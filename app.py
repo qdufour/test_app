@@ -27,26 +27,26 @@ def main():
     # Initialize session state
     if 'prev_selected_client' not in st.session_state:
         st.session_state.prev_selected_client = None
+        st.session_state.prev_scores = None
     
     # Sidebar for user input
     st.sidebar.header("Client ID")
     id_client = st.sidebar.selectbox("Sélection du client", df["SK_ID_CURR"])
     
-    if st.session_state.prev_selected_client is None or st.session_state.prev_selected_client != id_client:
-        # Update the previous selected client
-        st.session_state.prev_selected_client = id_client
-
-        example_idx = np.searchsorted(df["SK_ID_CURR"], id_client)
-        instance = df[example_idx:example_idx+1]    
-        
+    if st.session_state.prev_selected_client != id_client:
         scores_clients = fetch_scores(df)
-        print(scores_clients)
-        shap_values = explainer.shap_values(instance)
-        score = scores_clients[example_idx]
-    
-    """scores_clients = model.predict_proba(df)[:, 0]
+        st.session_state.prev_selected_client = id_client
+        st.session_state.prev_scores = scores_clients
+    else :
+        scores_clients = st.session_state.prev_scores
+        st.session_state.prev_selected_client = id_client
+        st.session_state.prev_scores = scores_clients
+        
+    example_idx = np.searchsorted(df["SK_ID_CURR"], id_client)
+    instance = df[example_idx:example_idx+1]    
+        
     shap_values = explainer.shap_values(instance)
-    score = model.predict_proba(instance)[0][0]"""
+    score = scores_clients[example_idx]
     
     # Titre de l'application
     st.title("Tableau de Bord Client")
@@ -125,7 +125,7 @@ def main():
     selected_feature_2 = st.selectbox("Sélectionnez la deuxième Feature :", df.columns)
     
     fig = px.scatter(df, x=selected_feature_1, y=selected_feature_2, color=scores_clients, title="Analyse Bivariée")
-    fig.update_traces(marker=dict(size=12, opacity=0.6), selector=dict(mode='markers'))
+    fig.update_traces(marker=dict(size=10, opacity=0.6), selector=dict(mode='markers'))
     
     client_feature_1 = df[selected_feature_1][example_idx]
     client_feature_2 = df[selected_feature_2][example_idx]
