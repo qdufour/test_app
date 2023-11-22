@@ -21,11 +21,7 @@ def fetch_scores(client_data):
 def main():
     st.title("Application de Visualisation des Scores Clients")
     model = joblib.load('model.pkl')
-<<<<<<< HEAD
     df = pd.read_csv('data1/data1.csv')
-=======
-    df = pd.read_csv('data1.csv')
->>>>>>> d89a1ec0dee529adb0daa8b877ac5ad24cd9d78b
     explainer = shap.Explainer(model, df)
     
     # Initialize session state
